@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gold Predictor Dashboard</title>
+<style>
+:root{
+    --bg:#0a0e27;
+    --bg-secondary:#151932;
+    --panel:#1a1f3a;
+    --gold:#ffd700;
+    --gold-light:#ffe55c;
+    --gold-dark:#d4af37;
+    --blue:#4c9aff;
+    --blue-light:#7db8ff;
+    --muted:#8b92b0;
+    --text:#e8eaf0;
+    --card-radius:16px;
+    --shadow:0 10px 40px rgba(0,0,0,0.3);
+    --glow:0 0 20px rgba(255,215,0,0.3);
+}
+
+* {
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+@keyframes fadeInUp {
+    from { opacity:0; transform:translateY(30px); }
+    to { opacity:1; transform:translateY(0); }
+}
+
+@keyframes slideInLeft {
+    from { opacity:0; transform:translateX(-30px); }
+    to { opacity:1; transform:translateX(0); }
+}
+
+@keyframes shimmer {
+    0% { background-position:-200% 0; }
+    100% { background-position:200% 0; }
+}
+
+@keyframes pulse {
+    0%,100% { transform:scale(1); }
+    50% { transform:scale(1.05); }
+}
+
+@keyframes float {
+    0%,100% { transform:translateY(0); }
+    50% { transform:translateY(-10px); }
+}
+
+body {
+    font-family:'Segoe UI',Roboto,sans-serif;
+    background:linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+    background-size:200% 200%;
+    animation:gradientShift 15s ease infinite;
+    min-height:100vh;
+    color:var(--text);
+    padding:28px;
+    position:relative;
+    overflow-x:hidden;
+}
+
+@keyframes gradientShift {
+    0%,100% { background-position:0% 50%; }
+    50% { background-position:100% 50%; }
+}
+
+body::before {
+    content:'';
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:radial-gradient(circle at 20% 50%, rgba(255,215,0,0.1) 0%, transparent 50%),
+               radial-gradient(circle at 80% 50%, rgba(76,154,255,0.1) 0%, transparent 50%);
+    pointer-events:none; z-index:0;
+}
+
+.layout {
+    max-width:1280px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:20px;
+    align-items:start;
+    position:relative; z-index:1;
+}
+
+.sidebar {
+    background:linear-gradient(135deg, var(--panel) 0%, var(--bg-secondary) 100%);
+    border-radius:var(--card-radius);
+    padding:18px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(255,215,0,0.1);
+    animation:slideInLeft 0.6s ease;
+    position:sticky; top:20px;
+}
+
+.brand {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:20px;
+    padding-bottom:15px;
+    border-bottom:1px solid rgba(255,215,0,0.2);
+}
+
+.logo {
+    width:48px; height:48px; border-radius:12px;
+    background:linear-gradient(135deg, var(--gold), var(--gold-dark));
+    display:flex; align-items:center; justify-content:center;
+    color:var(--bg); font-weight:900; font-size:20px;
+    box-shadow:var(--glow); animation:float 1s ease-in-out infinite;
+}
+
+.brand h3 {
+    background:linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+
+.nav a {
+    display:block; padding:12px 14px; border-radius:10px;
+    color:var(--muted); text-decoration:none; margin-bottom:8px;
+    transition:all 0.3s ease; position:relative; overflow:hidden;
+}
+
+.nav a::before {
+    content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
+    transition:left 0.5s ease;
+}
+
+.nav a:hover::before { left:100%; }
+
+.nav a.active, .nav a:hover {
+    background:linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
+    color:var(--gold); transform:translateX(5px);
+    box-shadow:0 4px 15px rgba(255,215,0,0.2);
+}
+
+.btn {
+    display:inline-block; padding:10px 14px; border-radius:10px; border:none;
+    background:linear-gradient(135deg, var(--blue), var(--blue-light));
+    color:white; font-weight:700; cursor:pointer; width:100%;
+    transition:all 0.3s ease; position:relative; overflow:hidden;
+    box-shadow:0 4px 15px rgba(76,154,255,0.3);
+}
+
+.btn::before {
+    content:''; position:absolute; top:50%; left:50%; width:0; height:0;
+    border-radius:50%; background:rgba(255,255,255,0.3);
+    transform:translate(-50%, -50%); transition:width 0.6s, height 0.6s;
+}
+
+.btn:hover::before { width:300px; height:300px; }
+.btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(76,154,255,0.4); }
+.btn:active { transform:translateY(0); }
+
+.btn-danger {
+    background:linear-gradient(135deg, #ff4757, #ff6348);
+    box-shadow:0 4px 15px rgba(255,71,87,0.3);
+}
+
+.btn-danger:hover { box-shadow:0 6px 20px rgba(255,71,87,0.4); }
+
+.main { display:flex; flex-direction:column; gap:18px; }
+
+.cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+
+.card {
+    background:linear-gradient(135deg, var(--panel), var(--bg-secondary));
+    padding:20px; border-radius:var(--card-radius); box-shadow:var(--shadow);
+    border:1px solid rgba(255,215,0,0.1); transition:all 0.4s ease;
+    animation:fadeInup 0.6s ease; position:relative; overflow:hidden;
+}
+
+.card::before {
+    content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
+    background:linear-gradient(45deg, transparent, rgba(255,215,0,0.05), transparent);
+    transform:rotate(45deg); transition:all 0.6s ease;
+}
+
+.card:hover::before { left:100%; }
+
+.card:hover { transform:translateY(-5px) scale(1.02); box-shadow:0 15px 40px rgba(255,215,0,0.2), var(--glow); border-color:rgba(255,215,0,0.3); }
+
+.k {
+    font-size:28px; font-weight:800;
+    background:linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+
+.lbl { font-size:13px; color:var(--muted); margin-top:8px; display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:1px; }
+
+.lower { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+
+.panel {
+    background:linear-gradient(135deg, var(--panel), var(--bg-secondary));
+    border-radius:var(--card-radius); padding:20px; box-shadow:var(--shadow);
+    border:1px solid rgba(255,215,0,0.1); animation:fadeInUp 0.8s ease; transition:all 0.3s ease;
+}
+
+.panel:hover { border-color:rgba(255,215,0,0.2); box-shadow:0 15px 40px rgba(0,0,0,0.4); }
+
+.panel h3 {
+    background:linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    margin-bottom:15px;
+}
+
+.form-row { display:flex; gap:12px; align-items:flex-end; margin-bottom:10px; }
+
+.date-input, .select-input {
+    padding:12px; border-radius:10px; border:1px solid rgba(255,215,0,0.2);
+    font-size:15px; width:100%; background:var(--bg-secondary); color:var(--text);
+    transition:all 0.3s ease;
+}
+
+.date-input:focus, .select-input:focus {
+    outline:none; border-color:var(--gold); box-shadow:0 0 15px rgba(255,215,0,0.3); transform:scale(1.02);
+}
+
+.prediction-large {
+    text-align:center; padding:30px; border-radius:12px;
+    background:linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.05));
+    border:2px solid rgba(255,215,0,0.3); margin-top:15px; animation:pulse 2s ease-in-out infinite;
+    position:relative; overflow:hidden;
+}
+
+.prediction-large::before {
+    content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,215,0,0.2), transparent); animation:shimmer 3s infinite;
+}
+
+.pred-big {
+    font-size:56px; font-weight:900;
+    background:linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+    background-size:200% auto; -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text; margin:10px 0; animation:shimmer 3s linear infinite; text-shadow:0 0 30px rgba(255,215,0,0.5);
+}
+
+.inr-calculation {
+    margin-top:20px; padding:20px; border-radius:10px;
+    background:linear-gradient(135deg, rgba(76,154,255,0.15), rgba(76,154,255,0.05));
+    border:1px solid rgba(76,154,255,0.3); text-align:left;
+}
+
+.calc-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid rgba(76,154,255,0.2);
+}
+
+.calc-row:last-child { border-bottom:none; padding-bottom:0; }
+
+.calc-label { color:var(--muted); font-size:14px; }
+
+.calc-value { 
+    font-weight:700; font-size:16px; color:var(--blue-light);
+}
+
+.calc-row.final {
+    margin-top:10px; padding-top:15px; border-top:2px solid rgba(76,154,255,0.4);
+}
+
+.calc-row.final .calc-value {
+    font-size:24px; color:var(--gold);
+}
+
+.chart img { width:100%; border-radius:12px; margin-top:10px; border:1px solid rgba(255,215,0,0.2); transition:all 0.3s ease; }
+.chart img:hover { transform:scale(1.02); box-shadow:0 10px 30px rgba(255,215,0,0.3); }
+
+.note { font-size:13px; color:var(--muted); margin-top:12px; text-align:center; }
+
+.table-box { margin-top:12px; border-collapse:collapse; width:100%; font-size:14px; }
+.table-box th, .table-box td { border:1px solid rgba(255,215,0,0.2); padding:12px; text-align:center; transition:all 0.3s ease; }
+.table-box th { background:linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.1)); font-weight:600; color:var(--gold); }
+.table-box tbody tr:hover { background:rgba(255,215,0,0.1); transform:scale(1.01); box-shadow:0 4px 15px rgba(255,215,0,0.2); }
+
+.result-box {
+    margin-top:12px; padding:15px; border-radius:10px;
+    background:linear-gradient(135deg, rgba(76,154,255,0.2), rgba(76,154,255,0.1));
+    border:1px solid rgba(76,154,255,0.3); color:var(--blue-light); font-weight:500;
+    animation:fadeInUp 0.5s ease;
+}
+
+.error-box {
+    margin-top:12px; padding:15px; border-radius:10px;
+    background:linear-gradient(135deg, rgba(255,71,87,0.2), rgba(255,71,87,0.1));
+    border:1px solid rgba(255,71,87,0.3); color:#ff6b7a; font-weight:500; animation:fadeInUp 0.5s ease;
+}
+
+.history-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+
+.about-content { line-height:1.8; color:var(--muted); }
+.about-content h4 { margin-top:20px; margin-bottom:10px; color:var(--gold); }
+.about-content ul { margin-left:20px; margin-top:8px; }
+.about-content li { margin-bottom:6px; }
+
+@media(max-width:980px) {
+    .layout { grid-template-columns:1fr; }
+    .cards { grid-template-columns:1fr; }
+    .lower { grid-template-columns:1fr; }
+    .sidebar { display:none; }
+    body { padding:10px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+<div class="brand">
+    <div class="logo">Au</div>
+    <div>
+        <h3>Gold Analytics</h3>
+        <div style="font-size:12px;color:var(--muted)">AI Predictor</div>
+    </div>
+</div>
+<nav class="nav">
+<a class="{{ 'active' if section=='prediction' else '' }}" href="/">🔮 Predict</a>
+<a class="{{ 'active' if section=='history' else '' }}" href="/history">📜 History</a>
+<a class="{{ 'active' if section=='trends' else '' }}" href="/trends">📈 Trends</a>
+<a class="{{ 'active' if section=='compare' else '' }}" href="/compare">⚖ Compare</a>
+<a class="{{ 'active' if section=='about' else '' }}" href="/about">ℹ About</a>
+</nav>
+</aside>
+
+<main class="main">
+<div class="cards">
+<div class="card">
+    <div class="k">{{ model_metrics.r2 }}</div>
+    <div class="lbl">R-Squared</div>
+</div>
+<div class="card">
+    <div class="k">{{ model_metrics.mse }}</div>
+    <div class="lbl">MSE</div>
+</div>
+<div class="card">
+    <div class="k">${{ model_metrics.rmse }}</div>
+    <div class="lbl">RMSE</div>
+</div>
+</div>
+
+<div class="lower">
+<section class="panel">
+
+{% if section=='prediction' %}
+<h3>🔮 Make a Prediction</h3>
+<form method="POST" action="/">
+<div class="form-row">
+<div style="flex:1">
+<label class="lbl">Select future date</label>
+<input type="date" name="date" class="date-input" required min="{{ today_date }}">
+</div>
+<div>
+<button class="btn" type="submit" style="width:auto;padding:12px 24px;margin-top:0">Predict Price</button>
+</div>
+</div>
+</form>
+
+{% if error %}<div class="error-box">⚠ {{ error }}</div>{% endif %}
+{% if prediction %}
+<div class="prediction-large">
+<div style="color:var(--muted);font-size:16px;font-weight:600">Predicted Gold Price</div>
+<div class="pred-big">${{ "%.2f"|format(prediction) }}</div>
+<div class="note">✨ Polynomial Regression (degree 3)</div>
+
+{% if inr_calculation %}
+<div class="inr-calculation">
+<h4 style="color:var(--blue-light);margin-bottom:15px;font-size:16px">💰 Price Calculation Breakdown</h4>
+
+<div class="calc-row">
+<span class="calc-label">Original Price (USD)  per ounce</span>
+<span class="calc-value">${{ "%.2f"|format(inr_calculation.original_usd) }}</span>
+</div>
+<div class="calc-row">
+<span class="calc-label">After 6% Addition (import dudty)</span>
+<span class="calc-value">₹{{ "%.2f"|format(inr_calculation.after_6_percent) }}</span>
+</div>
+
+<div class="calc-row">
+<span class="calc-label">After 3% Addition (GST)</span>
+<span class="calc-value">₹{{ "%.2f"|format(inr_calculation.after_3_percent) }}</span>
+</div>
+
+<div class="calc-row final">
+<span class="calc-label" style="font-size:16px;font-weight:600">Final Price (INR)</span>
+<span class="calc-value">₹{{ "{:,.2f}".format(inr_calculation.inr_price) }} per gram</span>
+</div>
+</div>
+{% endif %}
+
+</div>
+{% else %}
+<div class="note">Choose a future date and click Predict to see the estimated gold price.</div>
+{% endif %}
+
+{% elif section=='history' %}
+<div class="history-header">
+<h3>📜 Prediction History</h3>
+{% if history %}
+<form method="POST" action="/clear_history" style="margin:0">
+<button class="btn btn-danger" type="submit" style="width:auto;padding:8px 16px;margin:0" onclick="return confirm('Are you sure you want to clear all history?')">🗑 Clear All</button>
+</form>
+{% endif %}
+</div>
+{% if history %}
+<table class="table-box">
+<thead>
+<tr><th>#</th><th>📅 Date</th><th>💰 USD Price</th><th>💵 INR Price</th><th>🕐 Timestamp</th></tr>
+</thead>
+<tbody>
+{% for h in history|reverse %}
+<tr>
+<td>{{ loop.index }}</td>
+<td>{{ h.date }}</td>
+<td style="color:var(--gold);font-weight:700">${{ "%.2f"|format(h.prediction) }}</td>
+<td style="color:var(--blue-light);font-weight:700">₹{{ "{:,.2f}".format(h.inr_price) if h.inr_price else 'N/A' }}</td>
+<td>{{ h.timestamp if h.timestamp else 'N/A' }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<div class="note">✅ Total predictions: {{ history|length }}</div>
+{% else %}
+<div class="note">No predictions made yet this session. Go to the Predict page to make your first prediction!</div>
+{% endif %}
+
+{% elif section=='trends' %}
+<h3>📈 Gold Price Trends</h3>
+<p style="color:var(--muted);margin-top:8px;font-size:14px">View historical gold price data and trends over time.</p>
+{% if plot_image %}
+<div class="chart"><img src="data:image/png;base64,{{ plot_image }}" alt="Gold Price Trends"></div>
+{% else %}
+<div class="note">No trend data available.</div>
+{% endif %}
+
+{% elif section=='compare' %}
+<h3>⚖ Compare Years</h3>
+<p style="color:var(--muted);margin-top:8px;margin-bottom:12px;font-size:14px">Compare average gold prices between two different years.</p>
+<form method="POST">
+<div style="margin-bottom:12px">
+<label class="lbl">Select Year 1:</label>
+<select name="year1" class="select-input" required>
+{% for y in years %}<option value="{{y}}" {% if year1==y %}selected{% endif %}>{{y}}</option>{% endfor %}
+</select>
+</div>
+<div style="margin-bottom:12px">
+<label class="lbl">Select Year 2:</label>
+<select name="year2" class="select-input" required>
+{% for y in years %}<option value="{{y}}" {% if year2==y %}selected{% endif %}>{{y}}</option>{% endfor %}
+</select>
+</div>
+<button class="btn" type="submit">Compare Years</button>
+</form>
+{% if result %}<div class="result-box">📊 {{ result }}</div>{% endif %}
+
+{% elif section=='about' %}
+<h3>ℹ About This Model</h3>
+<div class="about-content">
+<p style="margin-top:10px">This dashboard uses machine learning to predict future gold prices based on historical data.</p>
+
+<h4>📊 Model Details</h4>
+<ul>
+<li>Algorithm: Polynomial Regression (degree 3)</li>
+<li>Training: 80% of historical data</li>
+<li>Testing: 20% for validation</li>
+</ul>
+
+<h4>🎯 Features</h4>
+<ul>
+<li><strong>Predict:</strong> Estimate future gold prices</li>
+<li><strong>History:</strong> View all your predictions</li>
+<li><strong>Trends:</strong> Visualize historical price movements</li>
+<li><strong>Compare:</strong> Analyze year-over-year changes</li>
+</ul>
+
+<h4>⚠ Disclaimer</h4>
+<p style="margin-top:5px">This tool is for educational and demonstration purposes only. Predictions are based on historical patterns and should NOT be used for financial decisions or investment advice.</p>
+</div>
+{% endif %}
+
+</section>
+<aside class="panel">
+<h3>📊 Chart Panel</h3>
+{% if (section=='prediction' or section=='trends') and plot_image %}
+<div class="chart"><img src="data:image/png;base64,{{ plot_image }}" alt="Gold Price Chart"></div>
+{% elif section=='history' and history %}
+<div style="margin-top:12px">
+<h4 style="font-size:15px;margin-bottom:12px;color:var(--gold)">🌟 Recent Predictions</h4>
+{% set recent_history = (history|reverse|list)[:3] %}
+{% for h in recent_history %}
+<div style="padding:12px;border-radius:10px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.2);margin-bottom:10px;transition:all 0.3s ease" onmouseover="this.style.transform='translateX(5px)';this.style.boxShadow='0 4px 15px rgba(255,215,0,0.3)'" onmouseout="this.style.transform='translateX(0)';this.style.boxShadow='none'">
+<div style="font-weight:700;font-size:18px;color:var(--gold)">${{ "%.2f"|format(h.prediction) }}</div>
+<div style="font-weight:600;font-size:14px;color:var(--blue-light);margin-top:4px">₹{{ "{:,.2f}".format(h.inr_price) if h.inr_price else 'N/A' }}</div>
+<div style="font-size:12px;color:var(--muted);margin-top:4px">📅 {{ h.date }}</div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="note">Use sections to view charts or information.</div>
+{% endif %}
+</aside>
+</div>
+</main>
+</div>
+</body>
+</html>
