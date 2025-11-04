@@ -78,6 +78,27 @@ body::before {
     pointer-events:none; z-index:0;
 }
 
+/* Mobile toggle checkbox (hidden) */
+#menu-toggle { display: none; }
+
+/* The visible burger icon label (hidden by default, shown in media query) */
+.menu-icon {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1100;
+    background: var(--gold);
+    color: var(--bg);
+    font-weight: 900;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: var(--glow);
+    user-select: none;
+}
+
+/* Layout */
 .layout {
     max-width:1280px;
     margin:0 auto;
@@ -96,6 +117,7 @@ body::before {
     border:1px solid rgba(255,215,0,0.1);
     animation:slideInLeft 0.6s ease;
     position:sticky; top:20px;
+    /* keep height unset so it fits content (as originally) */
 }
 
 .brand {
@@ -204,7 +226,7 @@ body::before {
     border:1px solid rgba(255,215,0,0.1); animation:fadeInUp 0.8s ease; transition:all 0.3s ease;
 }
 
-.panel:hover { border-color:rgba(255,215,0,0.2); box-shadow:0 15px 40px rgba(0,0,0,0.4); }
+.panel:hover { border-color:rgba(255,215,0,0.2); box-shadow:0 15px 40px #d7fc03; }
 
 .panel h3 {
     background:linear-gradient(135deg, var(--gold), var(--gold-light));
@@ -300,32 +322,99 @@ body::before {
 .about-content ul { margin-left:20px; margin-top:8px; }
 .about-content li { margin-bottom:6px; }
 
+/* Responsive: instead of hiding sidebar, slide it off-screen and use checkbox to toggle */
+/* MOBILE UI — clean, smooth, no JS */
 @media(max-width:980px) {
-    .layout { grid-template-columns:1fr; }
-    .cards { grid-template-columns:1fr; }
-    .lower { grid-template-columns:1fr; }
-    .sidebar { display:none; }
-    body { padding:10px; }
+    .layout {
+        grid-template-columns:1fr !important;
+    }
+
+    .menu-icon { display:block; 
+        font-size:30px;
+         padding:20px 24px; 
+         position:fixed; 
+         top:12px; left:12px; 
+         background:#00000080; 
+         border-radius:15px;
+          z-index:5000; 
+          cursor:pointer; 
+          color:white; }
+
+    .sidebar {
+        position:fixed;
+        top:0; left:0;
+        width:260px;
+        height:100vh;
+        transform:translateX(-100%);
+        background:#0b0e23ee;
+        backdrop-filter: blur(10px);
+        transition:.3s ease;
+        z-index:2500;
+        padding:20px;
+        overflow-y:auto;
+    }
+
+    #menu-toggle:checked ~ .layout .sidebar {
+        transform:translateX(0);
+    }
+
+    .main {
+        margin-top:60px;
+        padding:12px;
+    }
+
+    .cards, .lower {
+        grid-template-columns:1fr !important;
+        gap:12px;
+    }
+
+    .card, .panel {
+        padding:16px;
+    }
+
+    .pred-big {
+        font-size:80px;
+    }
+
+    .form-row {
+        flex-direction:column;
+        gap:10px;
+    }
+    .pred-big { font-size:42px; } .panel, 
+    .card { padding:15px; } 
+    .form-row { flex-direction:column; gap:8px; align-items:stretch; }
+     .calc-row { flex-direction:column; align-items:flex-start; } 
+     table.table-box th, 
+     table.table-box td
+      { font-size:12px; padding:100px; }
+      
 }
+
+
 </style>
 </head>
 <body>
+<input type="checkbox" id="menu-toggle" hidden>
+
+<label for="menu-toggle" class="menu-icon">☰</label>
+
 <div class="layout">
 <aside class="sidebar">
-<div class="brand">
-    <div class="logo">Au</div>
-    <div>
-        <h3>Gold Analytics</h3>
-        <div style="font-size:12px;color:var(--muted)">AI Predictor</div>
+    <div class="brand">
+        <div class="logo">Au</div>
+        <div>
+            <h3>Gold Analytics</h3>
+            <small>AI Predictor</small>
+        </div>
     </div>
-</div>
-<nav class="nav">
-<a class="{{ 'active' if section=='prediction' else '' }}" href="/">🔮 Predict</a>
-<a class="{{ 'active' if section=='history' else '' }}" href="/history">📜 History</a>
-<a class="{{ 'active' if section=='trends' else '' }}" href="/trends">📈 Trends</a>
-<a class="{{ 'active' if section=='compare' else '' }}" href="/compare">⚖ Compare</a>
-<a class="{{ 'active' if section=='about' else '' }}" href="/about">ℹ About</a>
-</nav>
+
+    <nav class="nav">
+        <a href="/" class="{{ 'active' if section=='prediction' else '' }}">🔮 Predict</a>
+        <a href="/history" class="{{ 'active' if section=='history' else '' }}">📜 History</a>
+        <a href="/trends" class="{{ 'active' if section=='trends' else '' }}">📈 Trends</a>
+        <a href="/compare" class="{{ 'active' if section=='compare' else '' }}">⚖ Compare</a>
+        <a href="/about" class="{{ 'active' if section=='about' else '' }}">ℹ About</a>
+    </nav>
 </aside>
 
 <main class="main">
@@ -386,9 +475,13 @@ body::before {
 <span class="calc-value">₹{{ "%.2f"|format(inr_calculation.after_3_percent) }}</span>
 </div>
 
-<div class="calc-row final">
+<div class="calc-row ">
 <span class="calc-label" style="font-size:16px;font-weight:600">Final Price (INR)</span>
 <span class="calc-value">₹{{ "{:,.2f}".format(inr_calculation.inr_price) }} per gram</span>
+</div>
+<div class="calc-row final">
+<span class="calc-label" style="font-size:16px;font-weight:600">Final Price (INR)</span>
+<span class="calc-value">₹{{ "{:,.2f}".format(inr_calculation.inr_price_for_10grams) }} per 10gram</span>
 </div>
 </div>
 {% endif %}

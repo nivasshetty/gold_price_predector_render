@@ -19,7 +19,7 @@ app = Flask(__name__, template_folder='templates')
 app.secret_key = "supersecretkey123"
 
 # USD to INR conversion rate (you can update this as needed)
-USD_TO_INR = 87.89
+USD_TO_INR = 88.64
 
 
 # ---------------- DATA AND MODEL ---------------- #
@@ -70,6 +70,7 @@ def calculate_inr_price(usd_price):
     usd_to_inr=(usd_price *USD_TO_INR )/31.103
     usd_to_inr_with_6_percent=usd_to_inr*1.06   
     final_price_in_inr=usd_to_inr_with_6_percent*1.03
+    final_price_in_inr_for_10grams=final_price_in_inr*10
     # # Step 1: Add 6% to original USD price
     # price_with_6_percent = usd_price * 1.06
     
@@ -83,11 +84,12 @@ def calculate_inr_price(usd_price):
         'original_usd': usd_price,
         'after_6_percent': usd_to_inr_with_6_percent,
         'after_3_percent': final_price_in_inr,
-        'inr_price': final_price_in_inr
+        'inr_price': final_price_in_inr,
+        'inr_price_for_10grams': final_price_in_inr_for_10grams
     }
 
 
-def create_plot(df, prediction_value=None, date_to_predict=None):
+def create_plot(df, prediction_value=None, date_to_predict=10/29/2026):
     # Set dark theme for matplotlib
     plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(12, 5))
